@@ -6,9 +6,32 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({
-  origin: 'https://canva-frontend-delta.vercel.app/' 
-}));
+// --- INÍCIO DA CORREÇÃO ---
+
+// Configuração de CORS mais robusta
+const allowedOrigins = ['https://canva-frontend-delta.vercel.app'];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Permite requisições da sua lista de permissões e requisições sem origem (ex: Postman)
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'OPTIONS'], // Garante que OPTIONS é permitido
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+// Aplica o middleware do CORS com as opções
+app.use(cors(corsOptions));
+
+// O Express com o middleware cors já lida com a resposta para a requisição OPTIONS.
+// Não é necessário um app.options('*', cors()); separado.
+
+// --- FIM DA CORREÇÃO ---
+
 
 app.use(express.json());
 
