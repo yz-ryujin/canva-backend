@@ -6,35 +6,24 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// --- INÍCIO DA CORREÇÃO ---
-
-// Configuração de CORS mais robusta
-const allowedOrigins = ['https://canva-frontend-delta.vercel.app'];
+// --- CONFIGURAÇÃO DE CORS CORRIGIDA ---
+// Esta configuração é mais robusta e garante que o seu backend
+// responda corretamente às verificações de segurança (preflight requests)
+// enviadas pelo navegador a partir do seu frontend na Vercel.
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Permite requisições da sua lista de permissões e requisições sem origem (ex: Postman)
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'OPTIONS'], // Garante que OPTIONS é permitido
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: 'https://canva-frontend-delta.vercel.app', // A URL exata do seu frontend
+  methods: ['POST', 'GET', 'OPTIONS'], // Permite os métodos necessários
+  allowedHeaders: ['Content-Type', 'Authorization'], // Permite os cabeçalhos necessários
 };
 
-// Aplica o middleware do CORS com as opções
+// O middleware cors do Express já lida com as requisições OPTIONS automaticamente
+// quando configurado desta forma.
 app.use(cors(corsOptions));
-
-// O Express com o middleware cors já lida com a resposta para a requisição OPTIONS.
-// Não é necessário um app.options('*', cors()); separado.
-
-// --- FIM DA CORREÇÃO ---
-
 
 app.use(express.json());
 
+// A rota da API
 app.post('/api/canva/token', async (req, res) => {
   const { code, code_verifier } = req.body;
 
@@ -51,7 +40,7 @@ app.post('/api/canva/token', async (req, res) => {
         client_id: process.env.CLIENT_ID,
         client_secret: process.env.CLIENT_SECRET,
         code_verifier,
-        redirect_uri: process.env.REDIRECT_URI,
+        redirect_uri: process.env.REDIRECT_URI, // Garanta que esta variável de ambiente está configurada na Vercel
       }),
       {
         headers: {
@@ -69,6 +58,12 @@ app.post('/api/canva/token', async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`✅ Backend rodando em http://localhost:${PORT}`);
-});
+// Vercel lida com o app.listen, então não é estritamente necessário, mas bom para dev local.
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`✅ Backend rodando em http://localhost:${PORT}`);
+    });
+}
+
+// Exporta o app para a Vercel usar
+module.exports = app;
