@@ -6,7 +6,13 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
+// CORS configurado para aceitar requisições do frontend local
+app.use(cors({
+  origin: 'http://127.0.0.1:5500',
+  methods: ['POST', 'GET', 'OPTIONS'],
+  allowedHeaders: ['Content-Type'],
+}));
+
 app.use(express.json());
 
 app.post('/api/canva/token', async (req, res) => {
