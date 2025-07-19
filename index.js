@@ -18,7 +18,7 @@ app.post('/api/canva/token', async (req, res) => {
 
   try {
     const tokenResponse = await axios.post(
-      'https://api.canva.com/oauth/token',
+      'https://api.canva.com/rest/v1/oauth/token',
       new URLSearchParams({
         grant_type: 'authorization_code',
         code,
